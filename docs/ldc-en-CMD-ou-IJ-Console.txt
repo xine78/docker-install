@@ -1,0 +1,41 @@
+docker run -d --net=host --name=zookeeper -e ZOOKEEPER_CLIENT_PORT=12181 -e ZOOKEEPER_TICK_TIME=2000 -e ZOOKEEPER_SYNC_LIMIT=2 confluentinc/cp-zookeeper:6.1.1
+docker run -d --net=host --name=kafka -e KAFKA_ZOOKEEPER_CONNECT=192.168.1.13:12181 -e KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://192.168.1.13:9092 -e KAFKA_BROKER_ID=2 -e KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1 confluentinc/cp-kafka
+
+
+docker run -d --name=kafka -p 9092:9092 -e KAFKA_ZOOKEEPER_CONNECT=172.17.0.3:2181 -e KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://192.168.1.13:9092 -e KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1 confluentinc/cp-kafka
+
+
+
+docker run -d -p 2181:2181 --name=adv-zk -e ZOOKEEPER_CLIENT_PORT=2181 -e ZOOKEEPER_TICK_TIME=2000 -e ZOOKEEPER_SYNC_LIMIT=2 confluentinc/cp-zookeeper
+docker run --name=kafka -e KAFKA_ZOOKEEPER_CONNECT=172.17.0.2:12181 -e KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://localhost:9092 -d -p 9092:9092 confluentinc/cp-kafka
+
+
+
+docker run --name=zookeeper -d -e ZOOKEEPER_CLIENT_PORT=2181 -p 12181:12181 -p 2888:2888 -p 3888:3888 confluentinc/cp-zookeeper:latest
+docker inspect zookeeper | find "IPAddress"
+docker run --name=kafka -e KAFKA_ZOOKEEPER_CONNECT=172.17.0.2:2181 -e KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://localhost:9092 -d -p 9092:9092 confluentinc/cp-kafka:latest
+----------------------------------------------------------
+docker run --name=zookeeper -d -e ZOOKEEPER_CLIENT_PORT=12181 -p 12181:12181 -p 2888:2888 -p 3888:3888 -e ZOOKEEPER_TICK_TIME=2000 -e ZOOKEEPER_SYNC_LIMIT=2 confluentinc/cp-zookeeper:latest
+
+-- kaka "trouve" zookeeper mais zookeeper se plaind "does not meet the required replication factor='3'" 
+docker run --name=zookeeper -d -e ZOOKEEPER_CLIENT_PORT=12181 -p 12181:12181 -p 2888:2888 -p 3888:3888 -e ZOOKEEPER_TICK_TIME=2000 -e ZOOKEEPER_SYNC_LIMIT=1 -e KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1 confluentinc/cp-zookeeper:latest
+
+docker inspect zookeeper | find "IPAddress" pour obtenir l'ip de zookeeper
+Note: KAFKA_ZOOKEEPER_CONNECT= l'ip du PC/Server sur le reseau (donc pas localhost, ce dernier etant different a l'interieur du sous reseau docker)
+
+docker run --name=kafka -e KAFKA_ZOOKEEPER_CONNECT=192.168.1.13:12181 -e KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://localhost:9092 -d -p 9092:9092 confluentinc/cp-kafka:latest
+----------------------------------------------------------
+DOCKER INSTALL - ZOOKZZPER & KAFKA
+----------------------------------
+cf https://www.youtube.com/watch?v=WnlX7w4lHvM
+dans un projet quelconque, creer un fichier ex: mon-docker-compose.yml
+puis dans l'onglet service d'IntelliJ faire
+docker-compose -f mon-docker-compose.yml up
+ou
+docker-compose -f mon-docker-compose.yml up -d   (lance en daemon en arriere plan)
+
+Accès au shell: dans terminal IntelliJ : docker exec -it kafka /bin/sh
+puis p.ex. cd /opt/kakfka_xxxxxxx/bin    pour trouver les scripts 
+par exemple pour creer topic : ./kafka-topics.sh --create --zookeeper:2181 --replication-factor 1 --partitions 1 --topic nomtopic
+pour lister les topics : ./kafka-topics.sh --list --zookeeper zookeeper:2181
+
