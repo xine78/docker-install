@@ -37,7 +37,7 @@ services:
 
   kafka-manager:
     container_name: kafka-manager
-    image: sheepkiller/kafka-manager:latest
+    image: hlebalbau/kafka-manager:latest
 #    network_mode: host
 #    depends_on:
 #      - zookeeper
